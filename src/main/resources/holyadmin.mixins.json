@@ -3,7 +3,8 @@
   "package": "net.holyworld.holyadmin.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "ChatScreenMixin"
+    "ChatScreenMixin",
+    "ChatHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1

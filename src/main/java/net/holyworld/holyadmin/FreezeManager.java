@@ -1,5 +1,11 @@
 package net.holyworld.holyadmin;
 
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
+
 import java.util.Locale;
 
 public final class FreezeManager {
@@ -58,5 +64,31 @@ public final class FreezeManager {
 		return h > 0
 			? String.format(Locale.ROOT, "%d:%02d:%02d", h, m, s)
 			: String.format(Locale.ROOT, "%02d:%02d", m, s);
+	}
+
+	public Text rewriteCheckMessage(Text message) {
+		if (!isActive() || message == null) {
+			return null;
+		}
+		String body = message.getString();
+		if (body == null || body.isEmpty()) {
+			return null;
+		}
+		String lowerBody = body.toLowerCase(Locale.ROOT);
+		String lowerNick = nick.toLowerCase(Locale.ROOT);
+		String content;
+		if (lowerBody.startsWith("<" + lowerNick + ">")) {
+			content = body.substring(lowerNick.length() + 2).trim();
+		} else if (lowerBody.startsWith(lowerNick + ":")) {
+			content = body.substring(lowerNick.length() + 1).trim();
+		} else {
+			return null;
+		}
+		Style red = Style.EMPTY.withColor(TextColor.fromFormatting(Formatting.RED));
+		MutableText out = Text.literal("");
+		out.append(Text.literal("[Проверка] ").setStyle(red));
+		out.append(Text.literal(nick + ": ").setStyle(red));
+		out.append(Text.literal(content).setStyle(red));
+		return out;
 	}
 }
