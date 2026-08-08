@@ -6,19 +6,17 @@ import net.minecraft.text.Text;
 
 import java.awt.Color;
 
-public final class RainbowText {
-	private RainbowText() {
+public final class ShimmerText {
+	private ShimmerText() {
 	}
 
-	public static Text rainbow(String s, float hueStart, float hueStep, float saturation, float brightness) {
+	public static Text shimmerBlue(String s, float t) {
 		MutableText out = Text.literal("");
 		int[] cps = s.codePoints().toArray();
 		for (int i = 0; i < cps.length; i++) {
-			float hue = (hueStart + i * hueStep) % 1.0f;
-			if (hue < 0) {
-				hue += 1.0f;
-			}
-			int color = Color.HSBtoRGB(hue, saturation, brightness);
+			float wave = (float) Math.sin((i * 0.35f) - t * 3.0f);
+			float brightness = 0.75f + 0.25f * (0.5f + 0.5f * wave);
+			int color = Color.HSBtoRGB(0.58f, 0.9f, brightness);
 			out.append(Text.literal(new String(Character.toChars(cps[i])))
 				.setStyle(Style.EMPTY.withColor(color)));
 		}

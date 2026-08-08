@@ -31,29 +31,25 @@ public final class FreezeHudRenderer {
 		String time = FreezeManager.formatTime(FreezeManager.INSTANCE.getElapsedMs());
 
 		float t = System.currentTimeMillis() / 1000.0f;
-		float phase = (t % 2.0f) / 2.0f;
+		Text line = ShimmerText.shimmerBlue("Проверка: " + nick + "  " + time, t);
 
-		Text nickText = RainbowText.rainbow(nick, phase, 0.02f, 0.9f, 1.0f);
-		Text timeText = RainbowText.rainbow("Проверка: " + time, phase + 0.5f, 0.02f, 0.9f, 1.0f);
-
-		int width = Math.max(tr.getWidth(nickText), tr.getWidth(timeText)) + 28;
+		int width = tr.getWidth(line) + 28;
 		int screenWidth = client.getWindow().getScaledWidth();
 		int x = (screenWidth - width) / 2;
-		int y = 10;
-		int height = 34;
+		int y = client.getWindow().getScaledHeight() - 40;
+		int height = 20;
 
 		context.fill(x, y, x + width, y + height, 0x99000000);
-		context.fill(x, y, x + width, y + 1, borderColor(phase));
-		context.fill(x, y + height - 1, x + width, y + height, borderColor(phase + 0.5f));
+		context.fill(x, y, x + width, y + 1, borderColor(t));
+		context.fill(x, y + height - 1, x + width, y + height, borderColor(t + 0.5f));
 
-		int nickX = x + (width - tr.getWidth(nickText)) / 2;
-		context.drawText(tr, nickText, nickX, y + 5, -1, true);
-
-		int timeX = x + (width - tr.getWidth(timeText)) / 2;
-		context.drawText(tr, timeText, timeX, y + 19, -1, true);
+		int textX = x + (width - tr.getWidth(line)) / 2;
+		int textY = y + (height - tr.fontHeight) / 2;
+		context.drawText(tr, line, textX, textY, -1, true);
 	}
 
-	private static int borderColor(float phase) {
-		return 0xFF000000 | Color.HSBtoRGB(phase % 1.0f, 0.85f, 1.0f);
+	private static int borderColor(float t) {
+		float brightness = 0.75f + 0.25f * (0.5f + 0.5f * (float) Math.sin(t * 3.0f));
+		return 0xFF000000 | Color.HSBtoRGB(0.58f, 0.9f, brightness);
 	}
 }
