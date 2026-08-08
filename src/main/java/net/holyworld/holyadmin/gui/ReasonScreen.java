@@ -24,7 +24,13 @@ public class ReasonScreen extends Screen {
 		int startX = (this.width - totalW) / 2;
 		int topY = this.height / 2 - 45;
 
-		String[] fixed = {"время вышло", "отказ", "признание", "неадекват", "autobuy", "automine"};
+		String[] fixed = new String[BanExecutor.REASONS.length - 1];
+		int fi = 0;
+		for (String r : BanExecutor.REASONS) {
+			if (!"своя причина".equalsIgnoreCase(r)) {
+				fixed[fi++] = r;
+			}
+		}
 		for (int i = 0; i < fixed.length; i++) {
 			int col = i % 2;
 			int row = i / 2;
@@ -37,7 +43,8 @@ public class ReasonScreen extends Screen {
 			}).dimensions(x, y, bw, bh).build());
 		}
 
-		int customY = topY + 3 * (bh + gap);
+		int rows = (fixed.length + 1) / 2;
+		int customY = topY + rows * (bh + gap);
 		this.addDrawableChild(ButtonWidget.builder(Text.literal("Своя причина"), button -> {
 			this.close();
 			MinecraftClient.getInstance().setScreen(new ChatScreen("/pr ban "));

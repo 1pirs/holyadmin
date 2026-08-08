@@ -14,11 +14,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ChatHudMixin {
 	@Inject(method = "method_44811", at = @At("HEAD"), cancellable = true)
 	private void holyadmin$markCheckMessages(Text message, MessageSignatureData signatureData, MessageIndicator indicator, CallbackInfo ci) {
-		Text rewritten = FreezeManager.INSTANCE.rewriteCheckMessage(message);
-		if (rewritten != null) {
-			ChatHud self = (ChatHud) (Object) this;
-			self.addMessage(rewritten, signatureData, indicator);
-			ci.cancel();
+		try {
+			Text rewritten = FreezeManager.INSTANCE.rewriteCheckMessage(message);
+			if (rewritten != null) {
+				ChatHud self = (ChatHud) (Object) this;
+				self.addMessage(rewritten, signatureData, indicator);
+				ci.cancel();
+			}
+		} catch (Throwable t) {
+			// не смогли переписать — оставляем оригинальное сообщение
 		}
 	}
 }

@@ -10,7 +10,7 @@ import java.util.Locale;
 
 public final class BanExecutor {
 	public static final String[] REASONS = {
-		"время вышло", "отказ", "признание", "своя причина", "неадекват", "autobuy", "automine"
+		"время вышло", "отказ", "признание", "лив с проверки", "своя причина", "неадекват", "autobuy", "automine"
 	};
 
 	private BanExecutor() {
@@ -59,6 +59,9 @@ public final class BanExecutor {
 		}
 		String s = raw.trim();
 		if (s.length() >= 2 && s.startsWith("\"") && s.endsWith("\"")) {
+			s = s.substring(1, s.length() - 1).trim();
+		}
+		if (s.length() >= 2 && s.startsWith("\u00ab") && s.endsWith("\u00bb")) {
 			s = s.substring(1, s.length() - 1).trim();
 		}
 		String lower = s.toLowerCase(Locale.ROOT);

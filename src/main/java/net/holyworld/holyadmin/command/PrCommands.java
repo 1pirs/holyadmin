@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.holyworld.holyadmin.ban.BanExecutor;
 import net.holyworld.holyadmin.gui.ReasonScreen;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.text.Text;
 
 import java.util.Locale;
@@ -32,13 +33,17 @@ public final class PrCommands {
 						String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
 						for (String reason : BanExecutor.REASONS) {
 							if (reason.toLowerCase(Locale.ROOT).startsWith(remaining)) {
-								builder.suggest(reason.contains(" ") ? "\"" + reason + "\"" : reason);
+								builder.suggest(reason);
 							}
 						}
 						return builder.buildFuture();
 					})
 					.executes(context -> {
 						String reason = StringArgumentType.getString(context, "reason");
+						if ("своя причина".equalsIgnoreCase(reason.trim())) {
+							MinecraftClient.getInstance().setScreen(new ChatScreen("/pr ban "));
+							return 1;
+						}
 						BanExecutor.ban(reason);
 						return 1;
 					})))
