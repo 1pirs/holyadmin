@@ -38,7 +38,7 @@ public final class BanExecutor {
 		}
 
 		String duration = "признание".equalsIgnoreCase(reason) ? "20d" : "30d";
-		String command = "banip " + nick + " " + duration + " 2.4 (" + reason + ") | Вопросы? " + vk;
+		String command = "banip " + nick + " " + duration + " 2.4 (" + reason + ") | Вопросы? " + vk + " -s";
 
 		ClientPlayNetworkHandler net = client.getNetworkHandler();
 		if (net == null) {
