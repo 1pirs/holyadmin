@@ -1,5 +1,6 @@
 package net.holyworld.holyadmin;
 
+import net.holyworld.holyadmin.clan.ClanParser;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -23,6 +24,9 @@ public final class FreezeManager {
 			command = command.substring(1).trim();
 		}
 		String lower = command.toLowerCase(Locale.ROOT);
+		if (lower.startsWith("clan list")) {
+			ClanParser.INSTANCE.arm();
+		}
 		if (!lower.startsWith("freezing")) {
 			return;
 		}
