@@ -36,7 +36,7 @@ public final class FreezeHudRenderer {
 		int width = tr.getWidth(line) + 28;
 		int screenWidth = client.getWindow().getScaledWidth();
 		int x = (screenWidth - width) / 2;
-		int y = client.getWindow().getScaledHeight() - 40;
+		int y = client.getWindow().getScaledHeight() - 60;
 		int height = 20;
 
 		context.fill(x, y, x + width, y + height, 0x99000000);

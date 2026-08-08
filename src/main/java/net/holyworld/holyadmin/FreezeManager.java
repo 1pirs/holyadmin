@@ -100,30 +100,48 @@ public final class FreezeManager {
 				return null;
 			}
 			if (isSpeakerBoundary(clean, idx)) {
-				int k = skipSpaces(clean, idx + nick.length());
-				if (k < clean.length() && clean.charAt(k) == '[') {
-					int t = clean.indexOf(']', k);
-					if (t >= 0) {
-						k = skipSpaces(clean, t + 1);
-					}
-				}
-				if (k < clean.length() && (clean.charAt(k) == ':' || clean.charAt(k) == '>' || clean.charAt(k) == ']')) {
-					char sep = clean.charAt(k);
-					int msgStart;
-					if (sep == ':') {
-						msgStart = skipSpaces(clean, k + 1);
-					} else {
-						int m = skipSpaces(clean, k + 1);
-						msgStart = (m < clean.length() && clean.charAt(m) == ':') ? skipSpaces(clean, m + 1) : m;
-					}
-					String content = stripCodes(clean.substring(msgStart).trim());
-					if (!content.isEmpty()) {
-						return content;
-					}
+				String content = extractAfterNick(clean, idx + nick.length());
+				if (content != null) {
+					return content;
 				}
 			}
 			from = idx + 1;
 		}
+	}
+
+	private static String extractAfterNick(String clean, int from) {
+		int k = skipSpaces(clean, from);
+		if (k < clean.length() && clean.charAt(k) == '[') {
+			int t = clean.indexOf(']', k);
+			if (t >= 0) {
+				k = skipSpaces(clean, t + 1);
+			}
+		}
+		if (startsWithIgnoreCase(clean, k, "mode:")) {
+			int colon2 = clean.indexOf(':', k + 5);
+			k = skipSpaces(clean, colon2 >= 0 ? colon2 + 1 : k + 5);
+			return stripCodes(clean.substring(k).trim());
+		}
+		if (k < clean.length() && (clean.charAt(k) == ':' || clean.charAt(k) == '>' || clean.charAt(k) == ']')) {
+			char sep = clean.charAt(k);
+			int msgStart;
+			if (sep == ':') {
+				msgStart = skipSpaces(clean, k + 1);
+			} else {
+				int m = skipSpaces(clean, k + 1);
+				msgStart = (m < clean.length() && clean.charAt(m) == ':') ? skipSpaces(clean, m + 1) : m;
+			}
+			String content = stripCodes(clean.substring(msgStart).trim());
+			return content.isEmpty() ? null : content;
+		}
+		return null;
+	}
+
+	private static boolean startsWithIgnoreCase(String s, int from, String prefix) {
+		if (from < 0 || from + prefix.length() > s.length()) {
+			return false;
+		}
+		return s.regionMatches(true, from, prefix, 0, prefix.length());
 	}
 
 	private static boolean isSpeakerBoundary(String s, int idx) {
