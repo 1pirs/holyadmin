@@ -74,6 +74,9 @@ public final class FreezeManager {
 		if (body == null || body.isEmpty()) {
 			return null;
 		}
+		if (body.startsWith("[Проверка]")) {
+			return null;
+		}
 		String content = extractCheckMessage(body, nick);
 		if (content == null) {
 			return null;
