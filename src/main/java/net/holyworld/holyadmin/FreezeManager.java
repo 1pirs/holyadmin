@@ -87,47 +87,65 @@ public final class FreezeManager {
 	}
 
 	private static String extractCheckMessage(String body, String nick) {
+		String clean = body.replaceAll("(?s)§.", "").trim();
 		String lowerNick = nick.toLowerCase(Locale.ROOT);
-		String lowerBody = body.toLowerCase(Locale.ROOT);
-
-		if (lowerBody.startsWith("<" + lowerNick + ">")) {
-			return body.substring(lowerNick.length() + 2).trim();
-		}
-		if (lowerBody.startsWith(lowerNick + ":")) {
-			return body.substring(lowerNick.length() + 1).trim();
-		}
-
-		int i = 0;
-		if (i < body.length() && body.charAt(i) == '[') {
-			int close = body.indexOf(']');
-			if (close < 0) {
-				return null;
-			}
-			i = close + 1;
-		}
-		i = skipSpaces(body, i);
-		int j = i;
-		while (j < body.length() && body.charAt(j) != '[' && body.charAt(j) != ':') {
-			j++;
-		}
-		String candidate = body.substring(i, j).trim();
-		if (!candidate.equalsIgnoreCase(nick)) {
+		String lowerBody = clean.toLowerCase(Locale.ROOT);
+		if (clean.isEmpty()) {
 			return null;
 		}
-		int k = j;
-		k = skipSpaces(body, k);
-		if (k < body.length() && body.charAt(k) == '[') {
-			int close = body.indexOf(']', k);
-			if (close < 0) {
-				return null;
+
+		if (lowerBody.startsWith("<" + lowerNick + ">")) {
+			return stripCodes(clean.substring(lowerNick.length() + 2).trim());
+		}
+		if (lowerBody.startsWith("[" + lowerNick + "]")) {
+			int k = skipSpaces(clean, lowerNick.length() + 2);
+			if (k < clean.length() && clean.charAt(k) == ':') {
+				k++;
 			}
-			k = close + 1;
-			k = skipSpaces(body, k);
+			return stripCodes(clean.substring(k).trim());
 		}
-		if (k < body.length() && body.charAt(k) == ':') {
-			k++;
+		if (lowerBody.startsWith(lowerNick)) {
+			int k = skipSpaces(clean, nick.length());
+			if (k < clean.length() && clean.charAt(k) == '[') {
+				int t = clean.indexOf(']', k);
+				if (t >= 0) {
+					k = skipSpaces(clean, t + 1);
+				}
+			}
+			if (k < clean.length() && clean.charAt(k) == ':') {
+				return stripCodes(clean.substring(k + 1).trim());
+			}
+			return null;
 		}
-		return body.substring(k).trim();
+		if (clean.charAt(0) == '[') {
+			int close = clean.indexOf(']');
+			if (close >= 0) {
+				int i = skipSpaces(clean, close + 1);
+				int j = i;
+				while (j < clean.length() && clean.charAt(j) != '[' && clean.charAt(j) != ':') {
+					j++;
+				}
+				if (clean.substring(i, j).trim().equalsIgnoreCase(nick)) {
+					int k = skipSpaces(clean, j);
+					if (k < clean.length() && clean.charAt(k) == '[') {
+						int t = clean.indexOf(']', k);
+						if (t < 0) {
+							return null;
+						}
+						k = skipSpaces(clean, t + 1);
+					}
+					if (k < clean.length() && clean.charAt(k) == ':') {
+						k++;
+					}
+					return stripCodes(clean.substring(k).trim());
+				}
+			}
+		}
+		return null;
+	}
+
+	private static String stripCodes(String s) {
+		return s.replaceAll("(?s)§.", "");
 	}
 
 	private static int skipSpaces(String s, int from) {
