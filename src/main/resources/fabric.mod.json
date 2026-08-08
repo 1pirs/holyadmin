@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "holyadmin",
+  "version": "${version}",
+  "name": "HolyAdmin",
+  "description": "Инструменты модератора HolyWorld: таймер проверки и команда /pr ban",
+  "authors": [
+    "1pirs"
+  ],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.holyworld.holyadmin.HolyAdminClient"
+    ]
+  },
+  "mixins": [
+    "holyadmin.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.4",
+    "java": ">=21"
+  }
+}
