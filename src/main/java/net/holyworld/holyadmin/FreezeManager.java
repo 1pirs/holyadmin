@@ -88,60 +88,50 @@ public final class FreezeManager {
 
 	private static String extractCheckMessage(String body, String nick) {
 		String clean = body.replaceAll("(?s)§.", "").trim();
-		String lowerNick = nick.toLowerCase(Locale.ROOT);
-		String lowerBody = clean.toLowerCase(Locale.ROOT);
 		if (clean.isEmpty()) {
 			return null;
 		}
-
-		if (lowerBody.startsWith("<" + lowerNick + ">")) {
-			return stripCodes(clean.substring(lowerNick.length() + 2).trim());
-		}
-		if (lowerBody.startsWith("[" + lowerNick + "]")) {
-			int k = skipSpaces(clean, lowerNick.length() + 2);
-			if (k < clean.length() && clean.charAt(k) == ':') {
-				k++;
+		String lowerClean = clean.toLowerCase(Locale.ROOT);
+		String lowerNick = nick.toLowerCase(Locale.ROOT);
+		int from = 0;
+		while (true) {
+			int idx = lowerClean.indexOf(lowerNick, from);
+			if (idx < 0) {
+				return null;
 			}
-			return stripCodes(clean.substring(k).trim());
-		}
-		if (lowerBody.startsWith(lowerNick)) {
-			int k = skipSpaces(clean, nick.length());
-			if (k < clean.length() && clean.charAt(k) == '[') {
-				int t = clean.indexOf(']', k);
-				if (t >= 0) {
-					k = skipSpaces(clean, t + 1);
-				}
-			}
-			if (k < clean.length() && clean.charAt(k) == ':') {
-				return stripCodes(clean.substring(k + 1).trim());
-			}
-			return null;
-		}
-		if (clean.charAt(0) == '[') {
-			int close = clean.indexOf(']');
-			if (close >= 0) {
-				int i = skipSpaces(clean, close + 1);
-				int j = i;
-				while (j < clean.length() && clean.charAt(j) != '[' && clean.charAt(j) != ':') {
-					j++;
-				}
-				if (clean.substring(i, j).trim().equalsIgnoreCase(nick)) {
-					int k = skipSpaces(clean, j);
-					if (k < clean.length() && clean.charAt(k) == '[') {
-						int t = clean.indexOf(']', k);
-						if (t < 0) {
-							return null;
-						}
+			if (isSpeakerBoundary(clean, idx)) {
+				int k = skipSpaces(clean, idx + nick.length());
+				if (k < clean.length() && clean.charAt(k) == '[') {
+					int t = clean.indexOf(']', k);
+					if (t >= 0) {
 						k = skipSpaces(clean, t + 1);
 					}
-					if (k < clean.length() && clean.charAt(k) == ':') {
-						k++;
+				}
+				if (k < clean.length() && (clean.charAt(k) == ':' || clean.charAt(k) == '>' || clean.charAt(k) == ']')) {
+					char sep = clean.charAt(k);
+					int msgStart;
+					if (sep == ':') {
+						msgStart = skipSpaces(clean, k + 1);
+					} else {
+						int m = skipSpaces(clean, k + 1);
+						msgStart = (m < clean.length() && clean.charAt(m) == ':') ? skipSpaces(clean, m + 1) : m;
 					}
-					return stripCodes(clean.substring(k).trim());
+					String content = stripCodes(clean.substring(msgStart).trim());
+					if (!content.isEmpty()) {
+						return content;
+					}
 				}
 			}
+			from = idx + 1;
 		}
-		return null;
+	}
+
+	private static boolean isSpeakerBoundary(String s, int idx) {
+		if (idx == 0) {
+			return true;
+		}
+		char c = s.charAt(idx - 1);
+		return !Character.isLetterOrDigit(c) && c != '_';
 	}
 
 	private static String stripCodes(String s) {
