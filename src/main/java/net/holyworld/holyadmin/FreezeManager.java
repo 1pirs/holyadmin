@@ -74,14 +74,8 @@ public final class FreezeManager {
 		if (body == null || body.isEmpty()) {
 			return null;
 		}
-		String lowerBody = body.toLowerCase(Locale.ROOT);
-		String lowerNick = nick.toLowerCase(Locale.ROOT);
-		String content;
-		if (lowerBody.startsWith("<" + lowerNick + ">")) {
-			content = body.substring(lowerNick.length() + 2).trim();
-		} else if (lowerBody.startsWith(lowerNick + ":")) {
-			content = body.substring(lowerNick.length() + 1).trim();
-		} else {
+		String content = extractCheckMessage(body, nick);
+		if (content == null) {
 			return null;
 		}
 		Style red = Style.EMPTY.withColor(TextColor.fromFormatting(Formatting.RED));
@@ -90,5 +84,57 @@ public final class FreezeManager {
 		out.append(Text.literal(nick + ": ").setStyle(red));
 		out.append(Text.literal(content).setStyle(red));
 		return out;
+	}
+
+	private static String extractCheckMessage(String body, String nick) {
+		String lowerNick = nick.toLowerCase(Locale.ROOT);
+		String lowerBody = body.toLowerCase(Locale.ROOT);
+
+		if (lowerBody.startsWith("<" + lowerNick + ">")) {
+			return body.substring(lowerNick.length() + 2).trim();
+		}
+		if (lowerBody.startsWith(lowerNick + ":")) {
+			return body.substring(lowerNick.length() + 1).trim();
+		}
+
+		int i = 0;
+		if (i < body.length() && body.charAt(i) == '[') {
+			int close = body.indexOf(']');
+			if (close < 0) {
+				return null;
+			}
+			i = close + 1;
+		}
+		i = skipSpaces(body, i);
+		int j = i;
+		while (j < body.length() && body.charAt(j) != '[' && body.charAt(j) != ':') {
+			j++;
+		}
+		String candidate = body.substring(i, j).trim();
+		if (!candidate.equalsIgnoreCase(nick)) {
+			return null;
+		}
+		int k = j;
+		k = skipSpaces(body, k);
+		if (k < body.length() && body.charAt(k) == '[') {
+			int close = body.indexOf(']', k);
+			if (close < 0) {
+				return null;
+			}
+			k = close + 1;
+			k = skipSpaces(body, k);
+		}
+		if (k < body.length() && body.charAt(k) == ':') {
+			k++;
+		}
+		return body.substring(k).trim();
+	}
+
+	private static int skipSpaces(String s, int from) {
+		int k = from;
+		while (k < s.length() && s.charAt(k) == ' ') {
+			k++;
+		}
+		return k;
 	}
 }
